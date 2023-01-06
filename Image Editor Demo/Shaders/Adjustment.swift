@@ -14,7 +14,7 @@ final class Adjustments {
     var brigtness: Float = .zero
     var bwTransition: Float = .zero
     
-    private var deviceSupportsNonuniformThreadgroups: Bool // no need
+    private var deviceSupportsNonuniformThreadgroups: Bool
     private let pipelineState: MTLComputePipelineState
     
     init(library: MTLLibrary) throws {

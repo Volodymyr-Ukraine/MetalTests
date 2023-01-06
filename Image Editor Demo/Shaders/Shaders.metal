@@ -21,26 +21,16 @@ kernel void adjustments(texture2d<float, access::read> source [[ texture(0) ]],
                         uint2 position [[thread_position_in_grid]]) {
     const auto textureSize = ushort2(destination.get_width(),
                                      destination.get_height());
-//#ifndef DEVICE_SUPPORTS_NON_UNIFORM_TREADGROUPS
+    
     if (!deviceSupportsNonuniformThreadgroups) {
         if (position.x >= textureSize.x || position.y >= textureSize.y) {
             return;
         }
     }
-//#endif
-//    if (temperature <= 0) {
-//        const auto sourceValue = source.read(position);
-//        auto labValue = rgb2lab(sourceValue.rgb);
-//        const auto resultValue = float4(lab2rgb(labValue), sourceValue.a);
-//        destination.write(resultValue, position);
-//    } else {
-//        const auto sourceValue = source.read(position);
-//        destination.write(sourceValue, position);
-//    }
-    
+
     const auto sourceValue = source.read(position);
     auto labValue = rgb2lab(sourceValue.rgb);
-    if (bwTransition != 0) {
+    if (bwTransition != 0) { // bw filter is on?
         if (labValue.z > bwTransition) {
             const auto resultValue = float4(0.0f, 0.0f, 0.0f, sourceValue.a);
             destination.write(resultValue, position);
@@ -48,7 +38,7 @@ kernel void adjustments(texture2d<float, access::read> source [[ texture(0) ]],
             const auto resultValue = float4(1.0f, 1.0f, 1.0f, sourceValue.a);
             destination.write(resultValue, position);
         }
-    } else {
+    } else { // bw filter is off so we use other filters
         labValue = denormalizeLab(labValue);
         
         labValue.b += temperature * 10.0f;
@@ -60,5 +50,4 @@ kernel void adjustments(texture2d<float, access::read> source [[ texture(0) ]],
         const auto resultValue = float4(lab2rgb(labValue), sourceValue.a);
         destination.write(resultValue, position);
     }
- //    */
 }

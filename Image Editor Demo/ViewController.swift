@@ -35,12 +35,6 @@ class ViewController: UIViewController {
         self.commonInit()
     }
     
-//    init() {
-//        self.imageView = .init()
-//        super.init(nibName: nil, bundle: nil)
-//        self.commonInit()
-//    }
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
