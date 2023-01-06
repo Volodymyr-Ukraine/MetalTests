@@ -83,6 +83,13 @@ class ViewController: UIViewController {
                 self.adjustments.brigtness = $0
                 self.redraw()
             },
+            FloatSetting(name: "Black&White transition",
+                         defaultValue: .zero,
+                         min: 0,
+                         max: 1) {
+                self.adjustments.bwTransition = $0
+                self.redraw()
+            },
         ]
         
         guard let settingsView = self.settings.view

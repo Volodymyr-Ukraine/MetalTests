@@ -12,6 +12,7 @@ final class Adjustments {
     var temperature: Float = .zero
     var tint: Float = .zero
     var brigtness: Float = .zero
+    var bwTransition: Float = .zero
     
     private var deviceSupportsNonuniformThreadgroups: Bool // no need
     private let pipelineState: MTLComputePipelineState
@@ -43,6 +44,7 @@ final class Adjustments {
                          length: MemoryLayout<Float>.stride,
                          index: 1)
         encoder.setBytes(&self.brigtness, length: MemoryLayout<Float>.stride, index: 2)
+        encoder.setBytes(&self.bwTransition, length: MemoryLayout<Float>.stride, index: 3)
         let gridSize = MTLSize(width: source.width,
                                height: source.height,
                                depth: 1)
