@@ -31,7 +31,6 @@ kernel void adjustments(texture2d<float, access::read> source [[ texture(0) ]],
     const auto sourceValue = source.read(position);
     auto labValue = rgb2lab(sourceValue.rgb);
     if (bwTransition <= 0) { // bw filter is on?
-//            const auto resultValue = float4(lab2rgb(float3(labValue.x, 1.0f, 1.0f)), sourceValue.a);
             const auto resultValue = float4(labValue.xxx, sourceValue.a);
             destination.write(resultValue, position);
     } else { // bw filter is off so we use other filters

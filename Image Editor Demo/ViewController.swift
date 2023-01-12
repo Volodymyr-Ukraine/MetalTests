@@ -178,7 +178,6 @@ class ViewController: UIViewController {
                 self.imageView.image = UIImage(cgImage: cgImage)
             }
         }
-// no test
         commandBuffer.commit()
     }
 }
