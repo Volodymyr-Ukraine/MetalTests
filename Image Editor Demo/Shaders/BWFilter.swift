@@ -1,18 +1,14 @@
 //
-//  Adjustment.swift
+//  BWFilter.swift
 //  Image Editor Demo
 //
-//  Created by Volodymyr Shynkarenko on 30.12.2022.
+//  Created by Volodymyr Shynkarenko on 13.01.2023.
 //
 
-//import Foundation
 import Metal
 
-final class Adjustments {
-    var temperature: Float = .zero
-    var tint: Float = .zero
-    var brightness: Float = .zero
-//    var bwTransition: Bool = false
+final class BWFilter {
+    private var bwTransition: Bool = false
     
     private var deviceSupportsNonuniformThreadgroups: Bool
     private let pipelineState: MTLComputePipelineState
@@ -23,35 +19,25 @@ final class Adjustments {
         constantValues.setConstantValue(&self.deviceSupportsNonuniformThreadgroups,
                                         type: .bool,
                                         index: 0)
-        let function = try library.makeFunction(name: "adjustments",
+        let function = try library.makeFunction(name: "addBwFilter",
                                                 constantValues: constantValues)
         self.pipelineState = try library.device.makeComputePipelineState(function: function)
     }
     
     func refresh(_ values: [String: Filter]) {
-        temperature = values[Filter.temperature(0).id]?.floatValue ?? .zero
-        tint = values[Filter.tint(0).id]?.floatValue ?? .zero
-        brightness = values[Filter.brightness(0).id]?.floatValue ?? .zero
-//        bwTransition = (values[Filter.bw(false).id]?.value as? Bool) ?? false
+        bwTransition = (values[Filter.bw(false).id]?.value as? Bool) ?? false
     }
     
     func encode(source: MTLTexture,
                 destination: MTLTexture,
                 in commandBuffer: MTLCommandBuffer) {
+        guard bwTransition else { return }
         guard let encoder = commandBuffer.makeComputeCommandEncoder()
         else { return }
         encoder.setTexture(source,
                            index: 0)
         encoder.setTexture(destination,
                            index: 1)
-        encoder.setBytes(&self.temperature,
-                         length: MemoryLayout<Float>.stride,
-                         index: 0)
-        encoder.setBytes(&self.tint,
-                         length: MemoryLayout<Float>.stride,
-                         index: 1)
-        encoder.setBytes(&self.brightness, length: MemoryLayout<Float>.stride, index: 2)
-//        encoder.setBytes(&self.bwTransition, length: MemoryLayout<Bool>.stride, index: 3)
         let gridSize = MTLSize(width: source.width,
                                height: source.height,
                                depth: 1)
@@ -74,3 +60,4 @@ final class Adjustments {
         encoder.endEncoding()
     }
 }
+

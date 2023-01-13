@@ -17,7 +17,8 @@ class ViewController: UIViewController {
     private let device: MTLDevice
     private let commandQueue: MTLCommandQueue
     private let textureManager: TextureManager
-    private let adjustments: Adjustments
+//    private let adjustments: Adjustments
+    private let shadersContext: ShaderContext
     private var texturePair: (source: MTLTexture, destination: MTLTexture)?
 
     // MARK: - Init
@@ -29,7 +30,8 @@ class ViewController: UIViewController {
         self.device = device
         self.commandQueue = commandQueue
         self.imageView = .init()
-        self.adjustments = try .init(library: library)
+//        self.adjustments = try .init(library: library)
+        self.shadersContext = try ShaderContext(library: library, defaultValues: [])
         self.textureManager = .init(device: device)
         super.init(nibName: nil, bundle: nil)
         self.commonInit()
@@ -60,28 +62,30 @@ class ViewController: UIViewController {
                          defaultValue: .zero,
                          min: -1,
                          max: 1) {
-                self.adjustments.temperature = $0
-                self.redraw()
+                             self.shadersContext.add(.temperature($0))
+                             //self.adjustments.temperature = $0
+                             self.redraw()
             },
             FloatSetting(name: "Tint",
                          defaultValue: .zero,
                          min: -1,
                          max: 1) {
-                self.adjustments.tint = $0
+                             self.shadersContext.add(.tint($0))
+                //self.adjustments.tint = $0
                 self.redraw()
             },
-            FloatSetting(name: "Brigtness",
+            FloatSetting(name: "Brightness",
                          defaultValue: .zero,
                          min: -1,
                          max: 1) {
-                self.adjustments.brigtness = $0
+                             self.shadersContext.add(.brightness($0))
+//                self.adjustments.brigtness = $0
                 self.redraw()
             },
-            FloatSetting(name: "Black&White transition",
-                         defaultValue: .zero,
-                         min: 0,
-                         max: 1) {
-                self.adjustments.bwTransition = $0
+            BoolSetting(name: "Black&White Filter",
+                        initialValue: false) {
+                            self.shadersContext.add(.bw($0))
+//                self.adjustments.bwTransition = $0
                 self.redraw()
             },
         ]
@@ -166,7 +170,7 @@ class ViewController: UIViewController {
               let commandBuffer = self.commandQueue.makeCommandBuffer()
         else { return }
 
-        self.adjustments.encode(source: source,
+        self.shadersContext.encode(source: source,
                                 destination: destination,
                                 in: commandBuffer)
 

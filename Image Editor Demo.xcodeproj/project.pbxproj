@@ -18,6 +18,10 @@
 		18C889A426307BFB00B126F6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18C889A326307BFB00B126F6 /* Assets.xcassets */; };
 		18C889A726307BFB00B126F6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18C889A526307BFB00B126F6 /* LaunchScreen.storyboard */; };
 		18DF81E72639939D00D88D10 /* ViewController+Picker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DF81E62639939D00D88D10 /* ViewController+Picker.swift */; };
+		5C654D1929717479008DC2BF /* ShaderContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C654D1829717479008DC2BF /* ShaderContext.swift */; };
+		5C654D1B29717F0D008DC2BF /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C654D1A29717F0D008DC2BF /* Filter.swift */; };
+		5C654D1D297197D3008DC2BF /* Contrast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C654D1C297197D3008DC2BF /* Contrast.swift */; };
+		5C654D1F2971B461008DC2BF /* BWFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C654D1E2971B461008DC2BF /* BWFilter.swift */; };
 		5C78FDDA295DC00600EBB6A1 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5C78FDD9295DC00600EBB6A1 /* Shaders.metal */; };
 		5C78FDDC295F610D00EBB6A1 /* Adjustment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78FDDB295F610D00EBB6A1 /* Adjustment.swift */; };
 		5C78FDDE295F696E00EBB6A1 /* TextureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C78FDDD295F696E00EBB6A1 /* TextureManager.swift */; };
@@ -36,6 +40,10 @@
 		18C889A826307BFB00B126F6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		18DF81E62639939D00D88D10 /* ViewController+Picker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+Picker.swift"; sourceTree = "<group>"; };
 		18DF81E82639A90D00D88D10 /* ColorConversion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ColorConversion.h; sourceTree = "<group>"; };
+		5C654D1829717479008DC2BF /* ShaderContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderContext.swift; sourceTree = "<group>"; };
+		5C654D1A29717F0D008DC2BF /* Filter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filter.swift; sourceTree = "<group>"; };
+		5C654D1C297197D3008DC2BF /* Contrast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contrast.swift; sourceTree = "<group>"; };
+		5C654D1E2971B461008DC2BF /* BWFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BWFilter.swift; sourceTree = "<group>"; };
 		5C78FDD9295DC00600EBB6A1 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.metal; };
 		5C78FDDB295F610D00EBB6A1 /* Adjustment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Adjustment.swift; sourceTree = "<group>"; };
 		5C78FDDD295F696E00EBB6A1 /* TextureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureManager.swift; sourceTree = "<group>"; };
@@ -77,6 +85,10 @@
 				18DF81E82639A90D00D88D10 /* ColorConversion.h */,
 				5C78FDD9295DC00600EBB6A1 /* Shaders.metal */,
 				5C78FDDB295F610D00EBB6A1 /* Adjustment.swift */,
+				5C654D1C297197D3008DC2BF /* Contrast.swift */,
+				5C654D1E2971B461008DC2BF /* BWFilter.swift */,
+				5C654D1829717479008DC2BF /* ShaderContext.swift */,
+				5C654D1A29717F0D008DC2BF /* Filter.swift */,
 				5C78FDDD295F696E00EBB6A1 /* TextureManager.swift */,
 			);
 			path = Shaders;
@@ -193,14 +205,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				5C78FDDA295DC00600EBB6A1 /* Shaders.metal in Sources */,
+				5C654D1D297197D3008DC2BF /* Contrast.swift in Sources */,
+				5C654D1B29717F0D008DC2BF /* Filter.swift in Sources */,
 				5C78FDDC295F610D00EBB6A1 /* Adjustment.swift in Sources */,
 				1894985F2631C4720011E57B /* NavigationBar.swift in Sources */,
 				189498522631C19F0011E57B /* UIViewController+Extensions.swift in Sources */,
+				5C654D1929717479008DC2BF /* ShaderContext.swift in Sources */,
 				18C8899F26307BFB00B126F6 /* ViewController.swift in Sources */,
 				18DF81E72639939D00D88D10 /* ViewController+Picker.swift in Sources */,
 				18C8899B26307BFB00B126F6 /* AppDelegate.swift in Sources */,
 				5C78FDDE295F696E00EBB6A1 /* TextureManager.swift in Sources */,
 				18C8899D26307BFB00B126F6 /* SceneDelegate.swift in Sources */,
+				5C654D1F2971B461008DC2BF /* BWFilter.swift in Sources */,
 				189498782631D5290011E57B /* UIImage+Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
