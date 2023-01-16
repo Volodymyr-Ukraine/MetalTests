@@ -31,7 +31,12 @@ final class BWFilter {
     func encode(source: MTLTexture,
                 destination: MTLTexture,
                 in commandBuffer: MTLCommandBuffer) {
-        guard bwTransition else { return }
+        guard bwTransition else {
+            let encoder = commandBuffer.makeBlitCommandEncoder()
+            encoder?.copy(from: source, to: destination)
+            encoder?.endEncoding()
+            return
+        }
         guard let encoder = commandBuffer.makeComputeCommandEncoder()
         else { return }
         encoder.setTexture(source,

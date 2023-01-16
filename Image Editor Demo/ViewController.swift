@@ -17,7 +17,6 @@ class ViewController: UIViewController {
     private let device: MTLDevice
     private let commandQueue: MTLCommandQueue
     private let textureManager: TextureManager
-//    private let adjustments: Adjustments
     private let shadersContext: ShaderContext
     private var texturePair: (source: MTLTexture, destination: MTLTexture)?
 
@@ -30,8 +29,7 @@ class ViewController: UIViewController {
         self.device = device
         self.commandQueue = commandQueue
         self.imageView = .init()
-//        self.adjustments = try .init(library: library)
-        self.shadersContext = try ShaderContext(library: library, defaultValues: [])
+        self.shadersContext = try ShaderContext(library: library, device: device ,defaultValues: [])
         self.textureManager = .init(device: device)
         super.init(nibName: nil, bundle: nil)
         self.commonInit()
@@ -63,7 +61,6 @@ class ViewController: UIViewController {
                          min: -1,
                          max: 1) {
                              self.shadersContext.add(.temperature($0))
-                             //self.adjustments.temperature = $0
                              self.redraw()
             },
             FloatSetting(name: "Tint",
@@ -71,7 +68,6 @@ class ViewController: UIViewController {
                          min: -1,
                          max: 1) {
                              self.shadersContext.add(.tint($0))
-                //self.adjustments.tint = $0
                 self.redraw()
             },
             FloatSetting(name: "Brightness",
@@ -79,13 +75,11 @@ class ViewController: UIViewController {
                          min: -1,
                          max: 1) {
                              self.shadersContext.add(.brightness($0))
-//                self.adjustments.brigtness = $0
                 self.redraw()
             },
             BoolSetting(name: "Black&White Filter",
                         initialValue: false) {
                             self.shadersContext.add(.bw($0))
-//                self.adjustments.bwTransition = $0
                 self.redraw()
             },
         ]
