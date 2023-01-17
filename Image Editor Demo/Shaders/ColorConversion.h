@@ -124,15 +124,25 @@ METAL_FUNC normalizeLab(vec<T, 3> labColor) {
 
 template <typename T>
 enable_if_t<is_floating_point_v<T>, vec<T, 3>>
-METAL_FUNC rgb2hsi( vec<T, 3> rgb) {
+METAL_FUNC rgb2hsl( vec<T, 3> rgb) {
     vec<T, 3> result = rgb;
-    result.z = (rgb.r + rgb.b + rgb.g) / 3.0f; // I
+    const auto min = fmin3(rgb.r, rgb.g, rgb.b);
+    const auto max = fmax3(rgb.r, rgb.g, rgb.b);
+    result.x = max - min; // d
     
-    result.y = 1 - ( fmin3(rgb.r, rgb.g, rgb.b) / result.z);
-    float h = ((rgb.r - rgb.g) + (rgb.r - rgb.b)) / (2.0f * powr(pow(rgb.r-rgb.g, 2.0f) + ((rgb.r-rgb.b)*(rgb.g-rgb.b)) , 0.5f));
+    result.z = (max + min) / 2.0f; // L
+    if (0.0f == result.z) {
+        result.y = 0.0f;
+    } else {
+        result.y = result.x / (1.0f - abs((2.0f*result.z)-1.0f)); // S
+    }
+    if (result.x == 0.0f) {
+        return result;
+    }
+    float h = (rgb.r - ((rgb.g + rgb.b)/2.0f)) / (powr(pow(rgb.r-rgb.g, 2.0f) + ((rgb.r-rgb.b)*(rgb.g-rgb.b)) , 0.5f));
     result.x = acos(h);
-    if (rgb.b < rgb.g) {
-        result.x = M_PI_F * 2 - result.x;
+    if (rgb.b > rgb.g) {
+        result.x = M_PI_F * 2.0f - result.x;
     }
     result.x = result.x * 180.0f / M_PI_F;
     return result;
@@ -140,27 +150,29 @@ METAL_FUNC rgb2hsi( vec<T, 3> rgb) {
 
 template <typename T>
 enable_if_t<is_floating_point_v<T>, vec<T, 3>>
-METAL_FUNC hsi2rgb( vec<T, 3> hsi) {
-    vec<T, 3> result = hsi;
-    result.x = (1-abs((hsi.z * 2.0f) - 1)); // C
-    result.y = (hsi.x / M_PI_F) * 3; // H'
-    result.z = result.x * (1 - abs((((int) result.y) % 2) - 1)); // X
-    float m = hsi.z - (result.x / 2.0f);
-    if (result.y < 1) {
-        result = (result.x, result.z, 0.0f);
-    } else if (result.y < 2) {
-        result = (result.z, result.x, 0.0f);
-    } else if (result.y < 3) {
-        result = (0.0f, result.x, result.z);
-    } else if (result.y < 4) {
-        result = (0.0f, result.z, result.x);
-    } else if (result.y < 5) {
-        result = (result.z, 0.0f, result.x);
-    } else {
-        result = (result.x, 0.0f, result.z);
+METAL_FUNC hsl2rgb( vec<T, 3> hsl) {
+    if (0.0f == hsl.y) { // no saturation -> all gray
+        return hsl.zzz;
     }
-    
-    return (result.r + m, result.g + m, result.b + m);
+    vec<T, 3> result = hsl;
+    const auto d = hsl.y * (1.0f - abs(((2.0f*hsl.z) - 1.0f))); // d
+    const auto m = hsl.z - (d / 2.0f); // m
+    const auto x = d*(1.0f - abs(fmod(hsl.x / 60.0f, 2.0f) - 1.0f)); //x
+    if (hsl.x < 60.0f) {
+        result = float3(d, x, 0.0f);
+    } else if (hsl.x < 120.0f) {
+        result = float3(x, d, 0.0f);
+    } else if (hsl.x < 180.0f) {
+        result = float3(0.0f, d, x);
+    } else if (hsl.x < 240.0f) {
+        result = float3(0.0f, x, d);
+    } else if (hsl.x < 300.0f) {
+        result = float3(x, 0.0f, d);
+    } else {
+        result = float3(d, 0.0f, x);
+    }
+    result = float3(result.r + m, result.g + m, result.b + m);
+    return result;
 }
 
 

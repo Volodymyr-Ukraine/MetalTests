@@ -24,8 +24,9 @@ class ViewController: UIViewController {
 
     init(device: MTLDevice) throws {
         let library = try device.makeDefaultLibrary(bundle: .main)
-        guard let commandQueue = device.makeCommandQueue()
-        else { throw Error.commandQueueCreationFailed }
+        guard let commandQueue = device.makeCommandQueue() else {
+            throw Error.commandQueueCreationFailed
+        }
         self.device = device
         self.commandQueue = commandQueue
         self.imageView = .init()
@@ -40,73 +41,9 @@ class ViewController: UIViewController {
     }
     
     private func commonInit() {
-        self.picker.delegate = self
-        self.view.backgroundColor = .systemBackground
-        
-        self.title = "image editor demo"
-        self.navigationItem.leftBarButtonItem = .init(barButtonSystemItem: .camera,
-                                                      target: self,
-                                                      action: #selector(self.pickImage))
-        self.navigationItem.rightBarButtonItems = [
-            .init(barButtonSystemItem: .action,
-                  target: self,
-                  action: #selector(self.share))
-        ]
-
-        // settings
-        
-        self.settings.settings = [
-            FloatSetting(name: "Temperature",
-                         defaultValue: .zero,
-                         min: -1,
-                         max: 1) {
-                             self.shadersContext.add(.temperature($0))
-                             self.redraw()
-            },
-            FloatSetting(name: "Tint",
-                         defaultValue: .zero,
-                         min: -1,
-                         max: 1) {
-                             self.shadersContext.add(.tint($0))
-                self.redraw()
-            },
-            FloatSetting(name: "Brightness",
-                         defaultValue: .zero,
-                         min: -1,
-                         max: 1) {
-                             self.shadersContext.add(.brightness($0))
-                self.redraw()
-            },
-            BoolSetting(name: "Black&White Filter",
-                        initialValue: false) {
-                            self.shadersContext.add(.bw($0))
-                self.redraw()
-            },
-        ]
-        
-        guard let settingsView = self.settings.view
-        else { return }
-        self.settings.tableView.isScrollEnabled = false
-        self.addChild(self.settings)
-        self.view.addSubview(settingsView)
-        settingsView.snp.makeConstraints {
-            $0.left.right.equalToSuperview()
-            $0.bottom.equalTo(self.view.safeAreaLayoutGuide).inset(20)
-            $0.height.equalTo(self.settings.contentHeight)
-        }
-        
-        // image view
-
-        self.imageView.contentMode = .scaleAspectFit
-        self.imageView.layer.cornerRadius = 10
-        self.imageView.layer.masksToBounds = true
-        self.view.addSubview(self.imageView)
-        self.imageView.backgroundColor = .tertiarySystemFill
-        self.imageView.snp.makeConstraints {
-            $0.left.right.equalToSuperview().inset(20)
-            $0.top.equalTo(self.view.safeAreaLayoutGuide).inset(20)
-            $0.bottom.equalTo(settingsView.snp.top).inset(-20)
-        }
+        self.setupTitle()
+        self.setupSettings()
+        self.setupUI()
     }
 
     // MARK: - Life Cycle
@@ -177,5 +114,91 @@ class ViewController: UIViewController {
             }
         }
         commandBuffer.commit()
+    }
+    
+    private func setupTitle(){
+        self.picker.delegate = self
+        self.view.backgroundColor = .systemBackground
+        
+        self.title = "image editor demo"
+        self.navigationItem.leftBarButtonItem = .init(barButtonSystemItem: .camera,
+                                                      target: self,
+                                                      action: #selector(self.pickImage))
+        self.navigationItem.rightBarButtonItems = [
+            .init(barButtonSystemItem: .action,
+                  target: self,
+                  action: #selector(self.share))
+        ]
+    }
+    
+    private func setupUI() {
+        guard let settingsView = self.settings.view
+        else { return }
+        self.addChild(self.settings)
+        self.view.addSubview(settingsView)
+        settingsView.snp.makeConstraints {
+            $0.left.right.equalTo(self.view.safeAreaLayoutGuide)
+            $0.bottom.equalTo(self.view.safeAreaLayoutGuide).inset(20)
+            let height = self.settings.contentHeight
+            $0.height.equalTo(self.view.snp.height).dividedBy(2)
+        }
+        
+        // image view
+
+        self.imageView.contentMode = .scaleAspectFit
+        self.imageView.layer.cornerRadius = 10
+        self.imageView.layer.masksToBounds = true
+        self.view.addSubview(self.imageView)
+        self.imageView.backgroundColor = .tertiarySystemFill
+        self.imageView.snp.makeConstraints {
+            $0.left.right.equalToSuperview().inset(20)
+            $0.top.equalTo(self.view.safeAreaLayoutGuide).inset(20)
+            $0.bottom.equalTo(settingsView.snp.top).inset(-20)
+        }
+    }
+    
+    private func setupSettings() {
+        self.settings.settings = [
+            FloatSetting(name: "Temperature",
+                         defaultValue: .zero,
+                         min: -1,
+                         max: 1) {
+                             self.shadersContext.add(.temperature($0))
+                             self.redraw()
+            },
+            FloatSetting(name: "Tint",
+                         defaultValue: .zero,
+                         min: -1,
+                         max: 1) {
+                             self.shadersContext.add(.tint($0))
+                self.redraw()
+            },
+            FloatSetting(name: "Brightness",
+                         defaultValue: .zero,
+                         min: -1,
+                         max: 1) {
+                             self.shadersContext.add(.brightness($0))
+                self.redraw()
+            },
+            FloatSetting(name: "Contrast",
+                         defaultValue: .zero,
+                         min: -1,
+                         max: 1) {
+                             self.shadersContext.add(.contrast($0))
+                self.redraw()
+            },
+            FloatSetting(name: "Saturation",
+                         defaultValue: .zero,
+                         min: -1,
+                         max: 1) {
+                             self.shadersContext.add(.saturation($0))
+                self.redraw()
+            },
+            BoolSetting(name: "Black&White Filter",
+                        initialValue: false) {
+                            self.shadersContext.add(.bw($0))
+                self.redraw()
+            },
+        ]
     }
 }

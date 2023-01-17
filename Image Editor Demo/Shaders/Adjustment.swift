@@ -32,7 +32,6 @@ final class Adjustments {
         temperature = values[Filter.temperature(0).id]?.floatValue ?? .zero
         tint = values[Filter.tint(0).id]?.floatValue ?? .zero
         brightness = values[Filter.brightness(0).id]?.floatValue ?? .zero
-//        bwTransition = (values[Filter.bw(false).id]?.value as? Bool) ?? false
     }
     
     func encode(source: MTLTexture,
@@ -51,7 +50,6 @@ final class Adjustments {
                          length: MemoryLayout<Float>.stride,
                          index: 1)
         encoder.setBytes(&self.brightness, length: MemoryLayout<Float>.stride, index: 2)
-//        encoder.setBytes(&self.bwTransition, length: MemoryLayout<Bool>.stride, index: 3)
         let gridSize = MTLSize(width: source.width,
                                height: source.height,
                                depth: 1)

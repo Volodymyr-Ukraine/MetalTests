@@ -20,7 +20,7 @@ final class Contrast {
         constantValues.setConstantValue(&self.deviceSupportsNonuniformThreadgroups,
                                         type: .bool,
                                         index: 0)
-        let function = try library.makeFunction(name: "adjustments",
+        let function = try library.makeFunction(name: "adjustHsl",
                                                 constantValues: constantValues)
         self.pipelineState = try library.device.makeComputePipelineState(function: function)
     }
@@ -33,20 +33,25 @@ final class Contrast {
     func encode(source: MTLTexture,
                 destination: MTLTexture,
                 in commandBuffer: MTLCommandBuffer) {
+        guard (contrast != 0.0) || (saturation != 0.0) else {
+            let encoder = commandBuffer.makeBlitCommandEncoder()
+            encoder?.copy(from: source, to: destination)
+            encoder?.endEncoding()
+            return
+        }
+        
         guard let encoder = commandBuffer.makeComputeCommandEncoder()
         else { return }
         encoder.setTexture(source,
                            index: 0)
         encoder.setTexture(destination,
                            index: 1)
-//        encoder.setBytes(&self.temperature,
-//                         length: MemoryLayout<Float>.stride,
-//                         index: 0)
-//        encoder.setBytes(&self.tint,
-//                         length: MemoryLayout<Float>.stride,
-//                         index: 1)
-//        encoder.setBytes(&self.brightness, length: MemoryLayout<Float>.stride, index: 2)
-//        encoder.setBytes(&self.bwTransition, length: MemoryLayout<Bool>.stride, index: 3)
+        encoder.setBytes(&self.contrast,
+                         length: MemoryLayout<Float>.stride,
+                         index: 0)
+        encoder.setBytes(&self.saturation,
+                         length: MemoryLayout<Float>.stride,
+                         index: 1)
         let gridSize = MTLSize(width: source.width,
                                height: source.height,
                                depth: 1)
