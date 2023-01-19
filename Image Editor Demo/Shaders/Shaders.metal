@@ -60,13 +60,11 @@ kernel void addBwFilter(texture2d<float, access::read> source [[ texture(0) ]],
 
 kernel void adjustHsl(texture2d<float, access::read> source [[ texture(0) ]],
                      texture2d<float, access::write> destination [[ texture(1) ]],
-                     constant float& contrast [[ buffer(0) ]],
-                     constant float& saturation [[ buffer(1) ]],
+                     constant float& saturation [[ buffer(0) ]],
                      uint2 position [[thread_position_in_grid]]) {
-    const auto textureSize = ushort2(destination.get_width(),
-                                     destination.get_height());
-    
     if (!deviceSupportsNonuniformThreadgroups) {
+        const auto textureSize = ushort2(destination.get_width(),
+                                         destination.get_height());
         if (position.x >= textureSize.x || position.y >= textureSize.y) {
             return;
         }
@@ -75,8 +73,30 @@ kernel void adjustHsl(texture2d<float, access::read> source [[ texture(0) ]],
     const auto sourceValue = source.read(position);
     auto hslValue = rgb2hsl(sourceValue.rgb);
     hslValue.g = clamp(hslValue.g + saturation, 0.0f, 1.0f);
-    hslValue.z = clamp(hslValue.z + contrast, 0.0f, 1.0f);
     const auto resultValue = float4(hsl2rgb(hslValue), sourceValue.a);
     destination.write(resultValue, position);
     
+}
+
+kernel void adjustContrast(texture2d<float, access::read> source [[ texture(0) ]],
+                           texture2d<float, access::write> destination [[ texture(1) ]],
+                           constant float& contrast [[ buffer(0) ]],
+                           uint2 position [[thread_position_in_grid]]) {
+    if (!deviceSupportsNonuniformThreadgroups) {
+        const auto textureSize = ushort2(destination.get_width(),
+                                         destination.get_height());
+        if (position.x >= textureSize.x || position.y >= textureSize.y) {
+            return;
+        }
+    }
+    
+    const auto sourceValue = source.read(position);
+    const float factor = (259.0f * (contrast + 255.0f)) / (255.0f * (259 - contrast));
+    const auto resultValue = float4(
+                                    clamp((factor * (sourceValue.r - 0.5f))+0.5f, 0.0f, 1.0f),
+                                    clamp((factor * (sourceValue.g - 0.5f))+0.5f, 0.0f, 1.0f),
+                                    clamp((factor * (sourceValue.b - 0.5f))+0.5f, 0.0f, 1.0f),
+                                    sourceValue.a
+                                    );
+    destination.write(resultValue, position);
 }

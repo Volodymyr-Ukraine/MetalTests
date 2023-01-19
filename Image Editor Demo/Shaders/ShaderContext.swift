@@ -10,9 +10,12 @@ import Metal
 
 final class ShaderContext {
     private var filters: [String: Filter] = [:]
+    
     private let adjustments: Adjustments
     private let bwFilter: BWFilter
     private let contrast: Contrast
+    private let saturation: Saturation
+    
     private let device: MTLDevice
     
     
@@ -20,6 +23,8 @@ final class ShaderContext {
         adjustments = try Adjustments(library: library)
         bwFilter = try BWFilter(library: library)
         contrast = try Contrast(library: library)
+        saturation = try Saturation(library: library)
+        
         self.device = device
         filters = Dictionary(uniqueKeysWithValues: defaultValues.map{
             ($0.id, $0)
@@ -41,8 +46,14 @@ final class ShaderContext {
         contrast.refresh(filters)
         contrast.encode(source: temporary1Source, destination: temporary2Source, in: commandBuffer)
         
+        let temporary3Source = cloneTexture(source)
+        saturation.refresh(filters)
+        saturation.encode(source: temporary2Source, destination: temporary3Source, in: commandBuffer)
+        
         bwFilter.refresh(filters)
-        bwFilter.encode(source: temporary2Source,  destination: destination, in: commandBuffer)
+        bwFilter.encode(source: temporary3Source,  destination: destination, in: commandBuffer)
+        
+        
     }
     
     private func cloneTexture(_ texture: MTLTexture) -> MTLTexture {

@@ -182,8 +182,8 @@ class ViewController: UIViewController {
             },
             FloatSetting(name: "Contrast",
                          defaultValue: .zero,
-                         min: -1,
-                         max: 1) {
+                         min: -128,
+                         max: 128) {
                              self.shadersContext.add(.contrast($0))
                 self.redraw()
             },
