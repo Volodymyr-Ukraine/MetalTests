@@ -19,6 +19,11 @@
 		18C889A726307BFB00B126F6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18C889A526307BFB00B126F6 /* LaunchScreen.storyboard */; };
 		18DF81E72639939D00D88D10 /* ViewController+Picker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DF81E62639939D00D88D10 /* ViewController+Picker.swift */; };
 		5C33CDAB29796EDD00898B41 /* Saturation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C33CDAA29796EDD00898B41 /* Saturation.swift */; };
+		5C33CDAE297FD98A00898B41 /* AbstractShader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C33CDAD297FD98A00898B41 /* AbstractShader.swift */; };
+		5C33CDB02981B36100898B41 /* Blur.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5C33CDAF2981B36100898B41 /* Blur.metal */; };
+		5C33CDB22984073800898B41 /* HorizontalBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C33CDB12984073800898B41 /* HorizontalBlur.swift */; };
+		5C33CDB42987C45200898B41 /* VerticalBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C33CDB32987C45200898B41 /* VerticalBlur.swift */; };
+		5C33CDB62987C46E00898B41 /* GausBlurCoefficients.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C33CDB52987C46E00898B41 /* GausBlurCoefficients.swift */; };
 		5C654D1929717479008DC2BF /* ShaderContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C654D1829717479008DC2BF /* ShaderContext.swift */; };
 		5C654D1B29717F0D008DC2BF /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C654D1A29717F0D008DC2BF /* Filter.swift */; };
 		5C654D1D297197D3008DC2BF /* Contrast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C654D1C297197D3008DC2BF /* Contrast.swift */; };
@@ -42,6 +47,12 @@
 		18DF81E62639939D00D88D10 /* ViewController+Picker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+Picker.swift"; sourceTree = "<group>"; };
 		18DF81E82639A90D00D88D10 /* ColorConversion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ColorConversion.h; sourceTree = "<group>"; };
 		5C33CDAA29796EDD00898B41 /* Saturation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Saturation.swift; sourceTree = "<group>"; };
+		5C33CDAC297994A300898B41 /* MatrixConvertion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MatrixConvertion.h; sourceTree = "<group>"; };
+		5C33CDAD297FD98A00898B41 /* AbstractShader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbstractShader.swift; sourceTree = "<group>"; };
+		5C33CDAF2981B36100898B41 /* Blur.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Blur.metal; sourceTree = "<group>"; };
+		5C33CDB12984073800898B41 /* HorizontalBlur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalBlur.swift; sourceTree = "<group>"; };
+		5C33CDB32987C45200898B41 /* VerticalBlur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalBlur.swift; sourceTree = "<group>"; };
+		5C33CDB52987C46E00898B41 /* GausBlurCoefficients.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GausBlurCoefficients.swift; sourceTree = "<group>"; };
 		5C654D1829717479008DC2BF /* ShaderContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderContext.swift; sourceTree = "<group>"; };
 		5C654D1A29717F0D008DC2BF /* Filter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filter.swift; sourceTree = "<group>"; };
 		5C654D1C297197D3008DC2BF /* Contrast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contrast.swift; sourceTree = "<group>"; };
@@ -85,12 +96,18 @@
 			isa = PBXGroup;
 			children = (
 				18DF81E82639A90D00D88D10 /* ColorConversion.h */,
+				5C33CDAC297994A300898B41 /* MatrixConvertion.h */,
 				5C78FDD9295DC00600EBB6A1 /* Shaders.metal */,
+				5C33CDAF2981B36100898B41 /* Blur.metal */,
 				5C78FDDB295F610D00EBB6A1 /* Adjustment.swift */,
 				5C654D1C297197D3008DC2BF /* Contrast.swift */,
 				5C33CDAA29796EDD00898B41 /* Saturation.swift */,
 				5C654D1E2971B461008DC2BF /* BWFilter.swift */,
+				5C33CDB12984073800898B41 /* HorizontalBlur.swift */,
+				5C33CDB32987C45200898B41 /* VerticalBlur.swift */,
+				5C33CDB52987C46E00898B41 /* GausBlurCoefficients.swift */,
 				5C654D1829717479008DC2BF /* ShaderContext.swift */,
+				5C33CDAD297FD98A00898B41 /* AbstractShader.swift */,
 				5C654D1A29717F0D008DC2BF /* Filter.swift */,
 				5C78FDDD295F696E00EBB6A1 /* TextureManager.swift */,
 			);
@@ -211,12 +228,17 @@
 				5C654D1D297197D3008DC2BF /* Contrast.swift in Sources */,
 				5C654D1B29717F0D008DC2BF /* Filter.swift in Sources */,
 				5C78FDDC295F610D00EBB6A1 /* Adjustment.swift in Sources */,
+				5C33CDB62987C46E00898B41 /* GausBlurCoefficients.swift in Sources */,
+				5C33CDB42987C45200898B41 /* VerticalBlur.swift in Sources */,
 				1894985F2631C4720011E57B /* NavigationBar.swift in Sources */,
 				189498522631C19F0011E57B /* UIViewController+Extensions.swift in Sources */,
+				5C33CDB22984073800898B41 /* HorizontalBlur.swift in Sources */,
 				5C654D1929717479008DC2BF /* ShaderContext.swift in Sources */,
+				5C33CDB02981B36100898B41 /* Blur.metal in Sources */,
 				18C8899F26307BFB00B126F6 /* ViewController.swift in Sources */,
 				18DF81E72639939D00D88D10 /* ViewController+Picker.swift in Sources */,
 				18C8899B26307BFB00B126F6 /* AppDelegate.swift in Sources */,
+				5C33CDAE297FD98A00898B41 /* AbstractShader.swift in Sources */,
 				5C78FDDE295F696E00EBB6A1 /* TextureManager.swift in Sources */,
 				18C8899D26307BFB00B126F6 /* SceneDelegate.swift in Sources */,
 				5C654D1F2971B461008DC2BF /* BWFilter.swift in Sources */,

@@ -7,11 +7,11 @@
 
 import Metal
 
-final class BWFilter {
+final class BWFilter: AbstractShader {
     private var bwTransition: Bool = false
     
     private var deviceSupportsNonuniformThreadgroups: Bool
-    private let pipelineState: MTLComputePipelineState
+    let pipelineState: MTLComputePipelineState
     
     init(library: MTLLibrary) throws {
         self.deviceSupportsNonuniformThreadgroups = library.device.supportsFeatureSet(.iOS_GPUFamily4_v1)
@@ -43,25 +43,7 @@ final class BWFilter {
                            index: 0)
         encoder.setTexture(destination,
                            index: 1)
-        let gridSize = MTLSize(width: source.width,
-                               height: source.height,
-                               depth: 1)
-        let threadGroupWidth = self.pipelineState.threadExecutionWidth
-        let threadGroupHeight = self.pipelineState.maxTotalThreadsPerThreadgroup / threadGroupWidth
-        let threadGroupSize = MTLSize(width: threadGroupWidth,
-                                      height: threadGroupHeight,
-                                      depth: 1)
-        encoder.setComputePipelineState(self.pipelineState)
-        if self.deviceSupportsNonuniformThreadgroups {
-            encoder.dispatchThreads(gridSize,
-                                    threadsPerThreadgroup: threadGroupSize)
-        } else {
-            let threadGroupCount = MTLSize(width: (gridSize.width + threadGroupSize.width - 1) / threadGroupSize.width,
-                                           height: (gridSize.height + threadGroupSize.height - 1) / threadGroupSize.height,
-                                           depth: 1)
-            encoder.dispatchThreadgroups(threadGroupCount,
-                                         threadsPerThreadgroup: threadGroupSize)
-        }
+        self.addDispatchThreads(into: encoder, for: source, self.deviceSupportsNonuniformThreadgroups)
         encoder.endEncoding()
     }
 }

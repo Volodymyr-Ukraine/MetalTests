@@ -19,6 +19,7 @@ class ViewController: UIViewController {
     private let textureManager: TextureManager
     private let shadersContext: ShaderContext
     private var texturePair: (source: MTLTexture, destination: MTLTexture)?
+    private var temporaryTexture: MTLTexture?
 
     // MARK: - Init
 
@@ -85,10 +86,12 @@ class ViewController: UIViewController {
     func handlePickedImage(image: UIImage) {
         guard let cgImage = image.cgImage,
               let source = try? self.textureManager.texture(from: cgImage),
-              let destination = try? self.textureManager.matchingTexture(to: source)
+              let destination = try? self.textureManager.matchingTexture(to: source),
+              let temporaryDestination = try? self.textureManager.matchingTexture(to: source)
         else { return }
         
         self.texturePair = (source, destination)
+        self.temporaryTexture = temporaryDestination
         self.imageView.image = image
         self.redraw()
     }
@@ -98,11 +101,13 @@ class ViewController: UIViewController {
     private func redraw() {
         guard let source = self.texturePair?.source,
               let destination = self.texturePair?.destination,
-              let commandBuffer = self.commandQueue.makeCommandBuffer()
+              let commandBuffer = self.commandQueue.makeCommandBuffer(),
+              let temporaryTexture = self.temporaryTexture
         else { return }
 
         self.shadersContext.encode(source: source,
                                 destination: destination,
+                                temporaryDestination: temporaryTexture,
                                 in: commandBuffer)
 
         commandBuffer.addCompletedHandler { _ in
@@ -139,7 +144,6 @@ class ViewController: UIViewController {
         settingsView.snp.makeConstraints {
             $0.left.right.equalTo(self.view.safeAreaLayoutGuide)
             $0.bottom.equalTo(self.view.safeAreaLayoutGuide).inset(20)
-            let height = self.settings.contentHeight
             $0.height.equalTo(self.view.snp.height).dividedBy(2)
         }
         
@@ -194,6 +198,13 @@ class ViewController: UIViewController {
                              self.shadersContext.add(.saturation($0))
                 self.redraw()
             },
+            FloatSetting(name: "Blur",
+                         defaultValue: .zero,
+                         min: .zero,
+                         max: 3){
+                             self.shadersContext.add(.blur($0))
+                             self.redraw()
+                         },
             BoolSetting(name: "Black&White Filter",
                         initialValue: false) {
                             self.shadersContext.add(.bw($0))

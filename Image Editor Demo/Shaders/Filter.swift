@@ -18,6 +18,8 @@ public enum Filter {
     case contrast(Float)
     case saturation(Float)
     
+    case blur(Float)
+    
     var id: String {
         switch self {
         case .temperature(_):
@@ -32,6 +34,8 @@ public enum Filter {
             return "contrast"
         case .saturation(_):
             return "saturation"
+        case .blur(_):
+            return "blur"
         }
     }
     
@@ -49,6 +53,8 @@ public enum Filter {
             return contrast
         case .saturation(let saturation):
             return saturation
+        case .blur(let blur):
+            return blur
         }
     }
     

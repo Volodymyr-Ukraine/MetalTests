@@ -15,20 +15,39 @@ final class ShaderContext {
     private let bwFilter: BWFilter
     private let contrast: Contrast
     private let saturation: Saturation
+    private let horizontalBlur: HorizontalBlur
+    private let verticalBlur: VerticalBlur
+    
+    private var blures: [AbstractShader] {
+        [
+            horizontalBlur,
+            verticalBlur
+        ]
+    }
     
     private let device: MTLDevice
-    
+    var lineShaders: [AbstractShader] {
+        [
+            adjustments,
+            bwFilter,
+            contrast,
+            saturation
+        ]
+    }
     
     init(library: MTLLibrary, device: MTLDevice, defaultValues: [Filter]) throws {
         adjustments = try Adjustments(library: library)
         bwFilter = try BWFilter(library: library)
         contrast = try Contrast(library: library)
         saturation = try Saturation(library: library)
+        horizontalBlur = try HorizontalBlur(library: library)
+        verticalBlur = try VerticalBlur(library: library)
         
         self.device = device
         filters = Dictionary(uniqueKeysWithValues: defaultValues.map{
             ($0.id, $0)
         })
+        
     }
     
     public func add(_ filter: Filter) {
@@ -37,23 +56,16 @@ final class ShaderContext {
     
     public func encode(source: MTLTexture,
                 destination: MTLTexture,
+                temporaryDestination: MTLTexture,
                 in commandBuffer: MTLCommandBuffer) {
-        adjustments.refresh(filters)
-        let temporary1Source = cloneTexture(source)
-        adjustments.encode(source: source, destination: temporary1Source, in: commandBuffer)
-        
-        let temporary2Source = cloneTexture(source)
-        contrast.refresh(filters)
-        contrast.encode(source: temporary1Source, destination: temporary2Source, in: commandBuffer)
-        
-        let temporary3Source = cloneTexture(source)
-        saturation.refresh(filters)
-        saturation.encode(source: temporary2Source, destination: temporary3Source, in: commandBuffer)
-        
-        bwFilter.refresh(filters)
-        bwFilter.encode(source: temporary3Source,  destination: destination, in: commandBuffer)
-        
-        
+        (lineShaders + blures).forEach{
+            $0.refresh(filters)
+        }
+        horizontalBlur.encode(source: source, destination: temporaryDestination, in: commandBuffer)
+        verticalBlur.encode(source: temporaryDestination, destination: destination, in: commandBuffer)
+        lineShaders.forEach{
+            $0.encode(source: destination, destination: destination, in: commandBuffer)
+        }
     }
     
     private func cloneTexture(_ texture: MTLTexture) -> MTLTexture {
