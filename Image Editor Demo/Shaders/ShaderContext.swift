@@ -17,6 +17,7 @@ final class ShaderContext {
     private let saturation: Saturation
     private let horizontalBlur: HorizontalBlur
     private let verticalBlur: VerticalBlur
+    private let cropShader: CropShader
     
     private var blures: [AbstractShader] {
         [
@@ -42,6 +43,7 @@ final class ShaderContext {
         saturation = try Saturation(library: library)
         horizontalBlur = try HorizontalBlur(library: library)
         verticalBlur = try VerticalBlur(library: library)
+        cropShader = try CropShader(library: library)
         
         self.device = device
         filters = Dictionary(uniqueKeysWithValues: defaultValues.map{
@@ -54,15 +56,21 @@ final class ShaderContext {
         filters[filter.id] = filter
     }
     
+    public func readFloat(_ filter: Filter) -> Float? {
+        return filters[filter.id]?.floatValue
+    }
+    
     public func encode(source: MTLTexture,
                 destination: MTLTexture,
                 temporaryDestination: MTLTexture,
                 in commandBuffer: MTLCommandBuffer) {
-        (lineShaders + blures).forEach{
+        (lineShaders + blures + [cropShader]).forEach{
             $0.refresh(filters)
         }
-        horizontalBlur.encode(source: source, destination: temporaryDestination, in: commandBuffer)
-        verticalBlur.encode(source: temporaryDestination, destination: destination, in: commandBuffer)
+        cropShader.encode(source: source, destination: destination, in: commandBuffer)
+        
+//        horizontalBlur.encode(source: source, destination: temporaryDestination, in: commandBuffer)
+//        verticalBlur.encode(source: temporaryDestination, destination: destination, in: commandBuffer)
         lineShaders.forEach{
             $0.encode(source: destination, destination: destination, in: commandBuffer)
         }
@@ -72,6 +80,20 @@ final class ShaderContext {
         let matchingDescriptor = MTLTextureDescriptor()
         matchingDescriptor.width = texture.width
         matchingDescriptor.height = texture.height
+        matchingDescriptor.usage = texture.usage
+        matchingDescriptor.pixelFormat = texture.pixelFormat
+        matchingDescriptor.storageMode = texture.storageMode
+
+        guard let matchingTexture = device.makeTexture(descriptor: matchingDescriptor)
+        else { fatalError("wrong texture") }
+
+        return matchingTexture
+    }
+    
+    private func makeTextureBased(on texture: MTLTexture, width: Int? = nil, height: Int? = nil) -> MTLTexture {
+        let matchingDescriptor = MTLTextureDescriptor()
+        matchingDescriptor.width = width ?? texture.width
+        matchingDescriptor.height = height ?? texture.height
         matchingDescriptor.usage = texture.usage
         matchingDescriptor.pixelFormat = texture.pixelFormat
         matchingDescriptor.storageMode = texture.storageMode

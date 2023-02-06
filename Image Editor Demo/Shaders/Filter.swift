@@ -6,7 +6,6 @@
 //
 
 import Foundation
-
 import SettingsViewController
 
 public enum Filter {
@@ -19,6 +18,9 @@ public enum Filter {
     case saturation(Float)
     
     case blur(Float)
+    
+    case cropX(Float)
+    case cropY(Float)
     
     var id: String {
         switch self {
@@ -36,6 +38,10 @@ public enum Filter {
             return "saturation"
         case .blur(_):
             return "blur"
+        case .cropX(_):
+            return "cropX"
+        case .cropY(_):
+            return "cropY"
         }
     }
     
@@ -55,6 +61,10 @@ public enum Filter {
             return saturation
         case .blur(let blur):
             return blur
+        case .cropX(let size):
+            return size
+        case .cropY(let size):
+            return size
         }
     }
     

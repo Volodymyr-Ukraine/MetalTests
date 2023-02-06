@@ -23,7 +23,7 @@ protocol AbstractShader {
 
 extension AbstractShader {
     public func addDispatchThreads(into encoder: MTLComputeCommandEncoder, for source: MTLTexture, _ deviceSupportsNonuniformThreadgroups: Bool, pipeline: MTLComputePipelineState? = nil) {
-        var pipelineState = pipeline ?? self.pipelineState
+        let pipelineState = pipeline ?? self.pipelineState
         let gridSize = MTLSize(width: source.width,
                                height: source.height,
                                depth: 1)

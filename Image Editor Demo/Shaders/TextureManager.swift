@@ -82,4 +82,18 @@ final class TextureManager {
 
         return matchingTexture
     }
+    
+    func smallerTexture(compareWith texture: MTLTexture, width: Int, height: Int) throws -> MTLTexture {
+        let matchingDescriptor = MTLTextureDescriptor()
+        matchingDescriptor.width = width
+        matchingDescriptor.height = height
+        matchingDescriptor.usage = texture.usage
+        matchingDescriptor.pixelFormat = texture.pixelFormat
+        matchingDescriptor.storageMode = texture.storageMode
+
+        guard let matchingTexture = self.textureLoader.device.makeTexture(descriptor: matchingDescriptor)
+        else { throw Error.textureCreationFailed }
+
+        return matchingTexture
+    }
 }

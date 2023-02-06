@@ -84,9 +84,11 @@ class ViewController: UIViewController {
     }
     
     func handlePickedImage(image: UIImage) {
+        let cropX = shadersContext.readFloat(.cropX(0.0)) ?? 0.0
+        let cropY = shadersContext.readFloat(.cropY(0.0)) ?? 0.0
         guard let cgImage = image.cgImage,
               let source = try? self.textureManager.texture(from: cgImage),
-              let destination = try? self.textureManager.matchingTexture(to: source),
+              let destination = try? self.textureManager.smallerTexture(compareWith: source, width: Int(Float(source.width)*(1-(2*cropX))), height: Int(Float(source.height)*(1-(2*cropY)))),
               let temporaryDestination = try? self.textureManager.matchingTexture(to: source)
         else { return }
         
@@ -99,12 +101,19 @@ class ViewController: UIViewController {
     // MARK: - Private Methods
     
     private func redraw() {
+        let cropX = shadersContext.readFloat(.cropX(0.0)) ?? 0.0
+        let cropY = shadersContext.readFloat(.cropY(0.0)) ?? 0.0
+        let width = (1-(cropX*2)) * Float(texturePair?.source.width ?? 0)
+        let height = (1-(cropY*2)) * Float(texturePair?.source.height ?? 0)
+        
+        
         guard let source = self.texturePair?.source,
-              let destination = self.texturePair?.destination,
+              let destination = try? self.textureManager.smallerTexture(compareWith: source, width: Int(width), height: Int(height)),
               let commandBuffer = self.commandQueue.makeCommandBuffer(),
               let temporaryTexture = self.temporaryTexture
         else { return }
-
+        
+        self.texturePair?.destination = destination
         self.shadersContext.encode(source: source,
                                 destination: destination,
                                 temporaryDestination: temporaryTexture,
@@ -203,6 +212,20 @@ class ViewController: UIViewController {
                          min: .zero,
                          max: 3){
                              self.shadersContext.add(.blur($0))
+                             self.redraw()
+                         },
+            FloatSetting(name: "CropX",
+                         defaultValue: .zero,
+                         min: .zero,
+                         max: 0.4) {
+                             self.shadersContext.add(.cropX($0))
+                             self.redraw()
+                         },
+            FloatSetting(name: "CropY",
+                         defaultValue: .zero,
+                         min: .zero,
+                         max: 0.4) {
+                             self.shadersContext.add(.cropY($0))
                              self.redraw()
                          },
             BoolSetting(name: "Black&White Filter",
