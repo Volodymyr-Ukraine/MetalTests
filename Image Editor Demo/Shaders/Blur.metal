@@ -100,3 +100,21 @@ kernel void verticalBlur(texture2d<float, access::read> source [[ texture(0) ]],
     const auto resultValue = float4(totalPixel.rgb, source.read(position).a);
     destination.write(resultValue, position);
 }
+
+kernel void blur(texture2d<float, access::read> source [[ texture(0) ]],
+                 texture2d<float, access::write> destination [[ texture(1) ]],
+                 constant float *gausCoeficient [[buffer(0)]],
+                 constant int& length [[ buffer(1) ]],
+                 constant float& gausNormalizer [[ buffer(2) ]],
+                 uint2 position [[thread_position_in_grid]]) {
+    const auto textureSize = ushort2(destination.get_width(),
+                                     destination.get_height());
+    if (!deviceSupportsNonuniformThreadgroups) {
+        if (position.x >= textureSize.x || position.y >= textureSize.y) {
+            return;
+        }
+    }
+    
+    
+    
+}

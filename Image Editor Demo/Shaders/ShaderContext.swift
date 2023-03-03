@@ -29,7 +29,7 @@ final class ShaderContext {
     private let device: MTLDevice
     var lineShaders: [AbstractShader] {
         [
-            adjustments,
+//            adjustments,
             bwFilter,
             contrast,
             saturation
@@ -62,18 +62,30 @@ final class ShaderContext {
     
     public func encode(source: MTLTexture,
                 destination: MTLTexture,
-                temporaryDestination: MTLTexture,
-                in commandBuffer: MTLCommandBuffer) {
-        (lineShaders + blures + [cropShader]).forEach{
+                in commandBuffer: MTLCommandBuffer,
+                helper textureManager: TextureManager,
+                completion: @escaping MTLCommandBufferHandler
+    ) {
+        (lineShaders + blures + [cropShader, adjustments]).forEach{
             $0.refresh(filters)
         }
+        triggerProgrammaticCapture()
         cropShader.encode(source: source, destination: destination, in: commandBuffer)
         
-//        horizontalBlur.encode(source: source, destination: temporaryDestination, in: commandBuffer)
-//        verticalBlur.encode(source: temporaryDestination, destination: destination, in: commandBuffer)
+        guard let tempDestination = try? textureManager.matchingTexture(to: destination),
+              let tempDestination2 = try? textureManager.matchingTexture(to: destination) else { return }
+        
+        horizontalBlur.encode(source: destination, destination: tempDestination2, in: commandBuffer)
+//        verticalBlur.encode(source: tempDestination, destination: tempDestination2, in: commandBuffer)
+        
+        adjustments.encode(source: tempDestination2, destination: destination, in: commandBuffer)
         lineShaders.forEach{
             $0.encode(source: destination, destination: destination, in: commandBuffer)
         }
+        
+        commandBuffer.addCompletedHandler(completion)
+        commandBuffer.commit()
+        runMetalCommands()
     }
     
     private func cloneTexture(_ texture: MTLTexture) -> MTLTexture {
@@ -102,6 +114,24 @@ final class ShaderContext {
         else { fatalError("wrong texture") }
 
         return matchingTexture
+    }
+    
+    private func runMetalCommands() {
+        let captureManager = MTLCaptureManager.shared()
+        captureManager.stopCapture()
+    }
+    
+    private func triggerProgrammaticCapture() {
+        let captureManager = MTLCaptureManager.shared()
+            let captureDescriptor = MTLCaptureDescriptor()
+            captureDescriptor.captureObject = self.device
+            do {
+                try captureManager.startCapture(with: captureDescriptor)
+            }
+            catch
+            {
+                fatalError("error when trying to capture: \(error)")
+            }
     }
 }
 

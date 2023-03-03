@@ -20,6 +20,8 @@ class ViewController: UIViewController {
     private let shadersContext: ShaderContext
     private var texturePair: (source: MTLTexture, destination: MTLTexture)?
     private var temporaryTexture: MTLTexture?
+    
+    private var isReadyRedraw: Bool = true
 
     // MARK: - Init
 
@@ -101,6 +103,8 @@ class ViewController: UIViewController {
     // MARK: - Private Methods
     
     private func redraw() {
+        guard isReadyRedraw else {return}
+        isReadyRedraw = false
         let cropX = shadersContext.readFloat(.cropX(0.0)) ?? 0.0
         let cropY = shadersContext.readFloat(.cropY(0.0)) ?? 0.0
         let width = (1-(cropX*2)) * Float(texturePair?.source.width ?? 0)
@@ -109,25 +113,34 @@ class ViewController: UIViewController {
         
         guard let source = self.texturePair?.source,
               let destination = try? self.textureManager.smallerTexture(compareWith: source, width: Int(width), height: Int(height)),
-              let commandBuffer = self.commandQueue.makeCommandBuffer(),
-              let temporaryTexture = self.temporaryTexture
-        else { return }
+              let commandBuffer = self.commandQueue.makeCommandBuffer()
+        else {
+            isReadyRedraw = true
+            return
+        }
         
         self.texturePair?.destination = destination
         self.shadersContext.encode(source: source,
                                 destination: destination,
-                                temporaryDestination: temporaryTexture,
-                                in: commandBuffer)
-
-        commandBuffer.addCompletedHandler { _ in
+                                in: commandBuffer,
+                                helper: self.textureManager
+        ) { _ in
             guard let cgImage = try? self.textureManager.cgImage(from: destination)
-            else { return }
+            else {
+                self.isReadyRedraw = true
+                return
+            }
 
             DispatchQueue.main.async {
                 self.imageView.image = UIImage(cgImage: cgImage)
+                self.isReadyRedraw = true
             }
         }
-        commandBuffer.commit()
+    }
+    
+    private func runMetalCommands() {
+        let captureManager = MTLCaptureManager.shared()
+        captureManager.stopCapture()
     }
     
     private func setupTitle(){
@@ -208,7 +221,7 @@ class ViewController: UIViewController {
                 self.redraw()
             },
             FloatSetting(name: "Blur",
-                         defaultValue: .zero,
+                         defaultValue: 1.0,//.zero,
                          min: .zero,
                          max: 3){
                              self.shadersContext.add(.blur($0))
